@@ -9,3 +9,7 @@ xcuserdata/
 # this file only when you are backing it up.
 talkify-sparkle-private-key.txt
 sparkle_eddsa_private_key
+
+# The 353 MB Kokoro model is fetched from sherpa-onnx's official release for
+# local builds and release packaging. Keep it out of Git history.
+Talkify/Models/kokoro-en-v0_19/

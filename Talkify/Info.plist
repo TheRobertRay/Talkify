@@ -7,7 +7,7 @@
 	     Sparkle reads SUPublicEDKey straight from the bundle and Xcode's
 	     INFOPLIST_KEY_ passthrough silently drops keys it does not know. -->
 	<key>SUFeedURL</key>
-	<string>https://raw.githubusercontent.com/tornikegomareli/Talkify/main/appcast.xml</string>
+	<string>https://raw.githubusercontent.com/TheRobertRay/Talkify/main/appcast.xml</string>
 	<!-- Public half of the EdDSA signing key. The private half lives in the
 	     login Keychain and is never in the repository. -->
 	<key>SUPublicEDKey</key>

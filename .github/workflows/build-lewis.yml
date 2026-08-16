@@ -1,0 +1,81 @@
+name: Build Lewis app
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+
+jobs:
+  package:
+    runs-on: macos-26
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Fetch Lewis model
+        run: ./scripts/fetch-kokoro-model.sh
+
+      - name: Archive Talkify
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -project Talkify.xcodeproj \
+            -scheme Talkify \
+            -configuration Release \
+            -destination 'platform=macOS' \
+            -archivePath "$RUNNER_TEMP/Talkify.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" | tail -120
+
+      - name: Add model and package app
+        run: |
+          APP="$RUNNER_TEMP/Talkify.xcarchive/Products/Applications/Talkify.app"
+          mkdir -p "$APP/Contents/Resources/Models"
+          ditto Talkify/Models/kokoro-en-v0_19 \
+            "$APP/Contents/Resources/Models/kokoro-en-v0_19"
+          cp THIRD_PARTY_NOTICES.md "$APP/Contents/Resources/"
+          # Binary package archives retain development-only framework headers.
+          # They are not runtime content and make macOS framework sealing fail.
+          find "$APP/Contents/Frameworks" -type d \
+            \( -name Headers -o -name Modules \) -prune -exec rm -rf {} +
+          ORT="$APP/Contents/Frameworks/onnxruntime.framework"
+          if [[ -d "$ORT" ]]; then
+            rm -rf "$ORT/_CodeSignature"
+            mkdir -p "$ORT/Versions/A/Resources"
+            if [[ -f "$ORT/onnxruntime" && ! -L "$ORT/onnxruntime" ]]; then
+              if [[ -f "$ORT/Versions/A/onnxruntime" ]]; then
+                rm "$ORT/onnxruntime"
+              else
+                mv "$ORT/onnxruntime" "$ORT/Versions/A/onnxruntime"
+              fi
+            fi
+            if [[ -d "$ORT/Resources" && ! -L "$ORT/Resources" ]]; then
+              ditto "$ORT/Resources" "$ORT/Versions/A/Resources"
+              rm -rf "$ORT/Resources"
+            fi
+            find "$ORT" -maxdepth 1 -type f -exec \
+              mv {} "$ORT/Versions/A/Resources/" \;
+            rm -rf "$ORT/Versions/Current" "$ORT/onnxruntime" "$ORT/Resources"
+            ln -s A "$ORT/Versions/Current"
+            ln -s Versions/Current/onnxruntime "$ORT/onnxruntime"
+            ln -s Versions/Current/Resources "$ORT/Resources"
+            test -f "$ORT/Versions/A/onnxruntime"
+            test -L "$ORT/Versions/Current"
+            test -L "$ORT/onnxruntime"
+            test -L "$ORT/Resources"
+            find "$ORT" -maxdepth 3 -print
+          fi
+          while IFS= read -r -d '' framework; do
+            codesign --force --sign - "$framework"
+          done < <(find "$APP/Contents/Frameworks" -type d -name '*.framework' -print0)
+          codesign --force --sign - "$APP"
+          codesign --verify --deep --strict --verbose=2 "$APP"
+          ditto -c -k --sequesterRsrc --keepParent \
+            "$APP" "$RUNNER_TEMP/Talkify-Lewis.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Talkify-Lewis
+          path: ${{ runner.temp }}/Talkify-Lewis.zip
+          if-no-files-found: error

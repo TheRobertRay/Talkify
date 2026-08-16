@@ -26,7 +26,7 @@
 
 ## Privacy
 
-Everything is on-device: Apple's `SpeechAnalyzer`/`SpeechTranscriber` for recognition, `AVSpeechSynthesizer` for Read Aloud. Talkify makes no network requests, stores no audio, and keeps no history beyond the local usage metrics you can see in Insights.
+Everything is on-device: Apple's `SpeechAnalyzer`/`SpeechTranscriber` for recognition and Kokoro-82M through `sherpa-onnx` for Lewis Read Aloud. Talkify stores no dictated or selected text, saves no audio, and keeps no history beyond the local usage metrics you can see in Insights.
 
 ## Requirements
 
