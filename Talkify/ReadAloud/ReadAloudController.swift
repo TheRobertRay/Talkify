@@ -1,29 +1,29 @@
 import AppKit
-import AVFAudio
 
-/// Read Aloud: speaks the focused application's selected text with the
-/// Settings-picked voice. Apple speech synthesis only (CONTEXT.md: Apple
-/// frameworks only); playback is on-device and offline. Errors surface
-/// through the HUD message surface, matching Direct Dictation.
+/// Read Aloud: speaks the focused application's selected text with Lewis,
+/// Talkify's bundled local Kokoro voice. Errors surface through the HUD
+/// message surface, matching Direct Dictation.
 @MainActor
-final class ReadAloudController: NSObject {
-  /// Follows the synthesizer's actual state; the status menu mirrors it.
+final class ReadAloudController {
+  /// Follows inference and playback; the status menu mirrors both.
   var onSpeakingStateChange: ((Bool) -> Void)?
 
-  private let settings: AppSettings
   private let hudController: DictationHUDController
   private let selectionReader = FocusedSelectionReader()
-  private let synthesizer = AVSpeechSynthesizer()
+  private let player = LocalSpeechPlayer()
 
-  init(settings: AppSettings, hudController: DictationHUDController) {
-    self.settings = settings
+  init(hudController: DictationHUDController) {
     self.hudController = hudController
-    super.init()
-    synthesizer.delegate = self
+    player.onStateChange = { [weak self] active in
+      self?.onSpeakingStateChange?(active)
+    }
+    player.onError = { [weak self] message in
+      self?.hudController.showMessage(message)
+    }
   }
 
   func toggle() {
-    if synthesizer.isSpeaking {
+    if player.isActive {
       stop()
     } else {
       speakSelection()
@@ -31,7 +31,7 @@ final class ReadAloudController: NSObject {
   }
 
   func stop() {
-    synthesizer.stopSpeaking(at: .immediate)
+    player.stop()
   }
 
   private func speakSelection() {
@@ -47,40 +47,6 @@ final class ReadAloudController: NSObject {
       return
     }
 
-    let utterance = AVSpeechUtterance(string: selection)
-    if !settings.readAloudVoiceID.isEmpty,
-     let voice = AVSpeechSynthesisVoice(identifier: settings.readAloudVoiceID) {
-      utterance.voice = voice
-    }
-    synthesizer.speak(utterance)
-  }
-}
-
-extension ReadAloudController: AVSpeechSynthesizerDelegate {
-  nonisolated func speechSynthesizer(
-    _ synthesizer: AVSpeechSynthesizer,
-    didStart utterance: AVSpeechUtterance
-  ) {
-    Task { @MainActor [weak self] in
-      self?.onSpeakingStateChange?(true)
-    }
-  }
-
-  nonisolated func speechSynthesizer(
-    _ synthesizer: AVSpeechSynthesizer,
-    didFinish utterance: AVSpeechUtterance
-  ) {
-    Task { @MainActor [weak self] in
-      self?.onSpeakingStateChange?(false)
-    }
-  }
-
-  nonisolated func speechSynthesizer(
-    _ synthesizer: AVSpeechSynthesizer,
-    didCancel utterance: AVSpeechUtterance
-  ) {
-    Task { @MainActor [weak self] in
-      self?.onSpeakingStateChange?(false)
-    }
+    player.speak(selection)
   }
 }

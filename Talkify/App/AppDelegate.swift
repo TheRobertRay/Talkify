@@ -43,7 +43,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     self.usageTracker = usageTracker
 
     let readAloudController = ReadAloudController(
-      settings: settings,
       hudController: hudController
     )
     self.readAloudController = readAloudController

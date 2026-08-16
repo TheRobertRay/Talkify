@@ -14,8 +14,7 @@ The first implementation milestone contains only **Direct Dictation**. Other fea
 - AppKit is the application shell: lifecycle, menu bar status item, and non-activating panels such as the HUD
 - SwiftUI renders windowed UI such as settings and onboarding, hosted inside the AppKit shell
 - Talkify uses Swift 6 with complete strict concurrency
-- Talkify uses Apple frameworks only, with one exception: Sparkle, for updating itself
-- Sparkle is the single third-party dependency and is confined to `Talkify/Updates/`; nothing else imports it, and speech, insertion, and the HUD stay pure Apple frameworks
+- Talkify keeps dictation, insertion, and the HUD on Apple frameworks. Sparkle owns updates, while `sherpa-onnx` is confined to local Read Aloud inference.
 
 ## Language
 
@@ -52,7 +51,7 @@ An Apple-managed, on-device language asset used by the Speech framework.
 _Avoid_: Bundled model, Talkify model, Whisper model
 
 **Read Aloud**:
-Speaking the focused application's selected text out loud with an Apple system voice.
+Speaking the focused application's selected text out loud with the bundled local Lewis voice.
 _Avoid_: TTS mode, Speak selection
 
 **Drop Transcription**:
@@ -216,7 +215,7 @@ _Avoid_: Transcript history, cloud analytics
 - Insertion latency must be benchmarked before choosing permanent per-application defaults
 - Mid-session insertion was prototyped (streamed finalized chunks; a ghost overlay over the focused input) and rejected: insertion stays at session end, and no live-draft direction for Waveform and Edge Glow is chosen yet
 - A marked-text input method (system-dictation-style provisional text in any field) remains a considered route, deferred: it needs a separate installable input-source bundle, System Settings enablement, and cross-process wiring
-- **Read Aloud** speaks the focused application's selected text with Apple speech synthesis, on-device and offline; Siri voices are unavailable to third-party apps
+- **Read Aloud** speaks the focused application's selected text with Kokoro's Lewis voice, on-device and offline
 - Read Aloud reads the selection through Accessibility only; if nothing is selected it shows "No text selected" through the HUD and speaks nothing
 - Read Aloud starts and stops from the status menu ("Read Selected Text" / "Stop Reading") or with its recorded shortcut (Option+Escape by default, matching macOS speak-selection)
 - The Shortcuts section records bindings System Settings-style: the control arms and the next pressed key becomes the binding, and plain Escape cancels recording
@@ -241,10 +240,8 @@ _Avoid_: Transcript history, cloud analytics
 - The status menu shows the current bindings (a badge for the trigger, a key equivalent for Read Aloud where representable) and updates immediately when Settings changes them
 - Talkify swallows the configured Read Aloud shortcut so the system speak-selection never double-fires; plain Escape remains the dictation cancel, captured only mid-session
 - The Read Aloud shortcut is ignored while Direct Dictation is active — speech playback would feed the recognizer its own audio
-- The Read Aloud voice is a Settings pick listing only enhanced, premium, and authorized Personal voices, with the system default voice otherwise
-- Talkify cannot download synthesis voices (no public API); the Read Aloud section deep-links System Settings and the voice list refreshes live when a download finishes
-- Personal Voice requires the user's authorization, requested from the Read Aloud section; it is personal, non-commercial use by Apple's terms
-- Read Aloud uses Apple speech synthesis exclusively; local-inference voice models were researched and rejected to keep the app dependency-free — the project stays open source and integrations are left to contributors
+- Lewis is the single Read Aloud voice; Settings reports the installed local voice and its privacy boundary without exposing engine or model maintenance
+- Generated speech exists only as in-memory samples and is never written to a history or temporary audio file
 - Dragging a file toward the top edge of a display reveals the **Drop Target**, and the HUD opens as the pointer approaches the notch
 - An open **Drop Target** holds until the drag leaves the shape it opened into, not the narrower band that opened it, and it never falls back to a peek: collapsing while the pointer is still on the target reads as the target refusing the drop
 - The **Drop Target** appears only for a file the system reports as audio or video, so no list of file extensions is maintained

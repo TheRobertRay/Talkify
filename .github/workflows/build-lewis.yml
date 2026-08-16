@@ -1,0 +1,46 @@
+name: Build Lewis app
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+
+jobs:
+  package:
+    runs-on: macos-26
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Fetch Lewis model
+        run: ./scripts/fetch-kokoro-model.sh
+
+      - name: Archive Talkify
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -project Talkify.xcodeproj \
+            -scheme Talkify \
+            -configuration Release \
+            -destination 'platform=macOS' \
+            -archivePath "$RUNNER_TEMP/Talkify.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" | tail -120
+
+      - name: Add model and package app
+        run: |
+          APP="$RUNNER_TEMP/Talkify.xcarchive/Products/Applications/Talkify.app"
+          mkdir -p "$APP/Contents/Resources/Models"
+          ditto Talkify/Models/kokoro-en-v0_19 \
+            "$APP/Contents/Resources/Models/kokoro-en-v0_19"
+          cp THIRD_PARTY_NOTICES.md "$APP/Contents/Resources/"
+          codesign --force --deep --sign - "$APP"
+          ditto -c -k --sequesterRsrc --keepParent \
+            "$APP" "$RUNNER_TEMP/Talkify-Lewis.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Talkify-Lewis
+          path: ${{ runner.temp }}/Talkify-Lewis.zip
+          if-no-files-found: error

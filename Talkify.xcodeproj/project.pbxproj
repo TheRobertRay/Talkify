@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		9ESPARK03000000000000003 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 9ESPARK02000000000000002 /* Sparkle */; };
+		9ESHERPA0300000000000003 /* sherpa-onnx in Frameworks */ = {isa = PBXBuildFile; productRef = 9ESHERPA0200000000000002 /* sherpa-onnx */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -30,6 +31,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				Models,
 			);
 			target = 9E87DA65302384C5007A1A70 /* Talkify */;
 		};
@@ -57,6 +59,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9ESPARK03000000000000003 /* Sparkle in Frameworks */,
+				9ESHERPA0300000000000003 /* sherpa-onnx in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -109,6 +112,7 @@
 			name = Talkify;
 			packageProductDependencies = (
 				9ESPARK02000000000000002 /* Sparkle */,
+				9ESHERPA0200000000000002 /* sherpa-onnx */,
 			);
 			productName = Talkify;
 			productReference = 9E87DA66302384C5007A1A70 /* Talkify.app */;
@@ -167,6 +171,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				9ESPARK01000000000000001 /* XCRemoteSwiftPackageReference "Sparkle" */,
+				9ESHERPA0100000000000001 /* XCRemoteSwiftPackageReference "sherpa-onnx" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9E87DA67302384C5007A1A70 /* Products */;
@@ -514,6 +519,14 @@
 				minimumVersion = 2.8.0;
 			};
 		};
+		9ESHERPA0100000000000001 /* XCRemoteSwiftPackageReference "sherpa-onnx" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/k2-fsa/sherpa-onnx.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.13.5;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -521,6 +534,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9ESPARK01000000000000001 /* XCRemoteSwiftPackageReference "Sparkle" */;
 			productName = Sparkle;
+		};
+		9ESHERPA0200000000000002 /* sherpa-onnx */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9ESHERPA0100000000000001 /* XCRemoteSwiftPackageReference "sherpa-onnx" */;
+			productName = "sherpa-onnx";
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
