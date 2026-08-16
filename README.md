@@ -88,28 +88,19 @@ The trigger and the Read Aloud shortcut are rebindable in **Settings → Shortcu
   <img src="docs/assets/drop-transcription.gif" width="90%" alt="A transcript card in the notch being dragged out and dropped straight into another app" />
 </p>
 
-Every other transcription app hands you a file picker. Talkify has a notch, so it
-can do something they cannot: pick up an audio or video file, drag it toward the
-top of the screen, and the island opens to receive it. The file goes in through
-the notch and the transcript comes back out of it.
+Drag an audio or video file to the top of the screen and the island opens to
+take it. It transcribes in the background, so **fn** keeps working, and the menu
+bar ghost shows progress.
 
-Drop it and the shape holds the file for a moment, so the gesture ends with the
-thing you dragged visibly inside the notch rather than with the notch vanishing.
-Then it transcribes in the background — **fn** keeps working the whole time, and
-the menu bar ghost fills as the job advances.
+When it finishes the island comes back holding the transcript. Drag it where you
+want it — a folder writes the `.txt`, a text field takes the words — or click it
+to copy the text. Leave it and after five seconds it saves next to the source
+file, or into a folder you set in **Settings → Drop Transcription**. Hovering
+pauses that timer.
 
-When it finishes, the island comes back holding a card. Drag the card wherever
-you want the transcript and that drop *is* the save: a folder writes the `.txt`,
-a text field takes the words. Click it instead and the text goes to the
-clipboard. Ignore it and after five seconds it saves itself next to the source
-file, or into a folder you pick in **Settings → Drop Transcription**, and tells
-you where it went. Reaching for the card stops that countdown, so it waits as
-long as you need.
-
-Only audio and video open the target — the system is asked what the file is
-rather than matching extensions — and with a second dictation language
-configured the target splits in two, so the half you drop on chooses the
-language.
+With a second dictation language configured, the target splits in two and the
+half you drop on picks the language. **Transcribe File…** in the menu does the
+same with a picker.
 
 ## Two languages, two keys
 
