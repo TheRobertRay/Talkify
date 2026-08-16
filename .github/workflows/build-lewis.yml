@@ -39,6 +39,21 @@ jobs:
           # They are not runtime content and make macOS framework sealing fail.
           find "$APP/Contents/Frameworks" -type d \
             \( -name Headers -o -name Modules \) -prune -exec rm -rf {} +
+          ORT="$APP/Contents/Frameworks/onnxruntime.framework"
+          if [[ -f "$ORT/onnxruntime" && ! -d "$ORT/Versions" ]]; then
+            rm -rf "$ORT/_CodeSignature"
+            mkdir -p "$ORT/Versions/A/Resources"
+            mv "$ORT/onnxruntime" "$ORT/Versions/A/onnxruntime"
+            if [[ -d "$ORT/Resources" ]]; then
+              ditto "$ORT/Resources" "$ORT/Versions/A/Resources"
+              rm -rf "$ORT/Resources"
+            fi
+            find "$ORT" -maxdepth 1 -type f -exec \
+              mv {} "$ORT/Versions/A/Resources/" \;
+            ln -s A "$ORT/Versions/Current"
+            ln -s Versions/Current/onnxruntime "$ORT/onnxruntime"
+            ln -s Versions/Current/Resources "$ORT/Resources"
+          fi
           while IFS= read -r -d '' framework; do
             codesign --force --sign - "$framework"
           done < <(find "$APP/Contents/Frameworks" -type d -name '*.framework' -print0)
