@@ -56,9 +56,14 @@ jobs:
             fi
             find "$ORT" -maxdepth 1 -type f -exec \
               mv {} "$ORT/Versions/A/Resources/" \;
-            ln -sfn A "$ORT/Versions/Current"
-            ln -sfn Versions/Current/onnxruntime "$ORT/onnxruntime"
-            ln -sfn Versions/Current/Resources "$ORT/Resources"
+            rm -rf "$ORT/Versions/Current" "$ORT/onnxruntime" "$ORT/Resources"
+            ln -s A "$ORT/Versions/Current"
+            ln -s Versions/Current/onnxruntime "$ORT/onnxruntime"
+            ln -s Versions/Current/Resources "$ORT/Resources"
+            test -f "$ORT/Versions/A/onnxruntime"
+            test -L "$ORT/Versions/Current"
+            test -L "$ORT/onnxruntime"
+            test -L "$ORT/Resources"
             find "$ORT" -maxdepth 3 -print
           fi
           while IFS= read -r -d '' framework; do
