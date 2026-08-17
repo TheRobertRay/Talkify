@@ -273,6 +273,13 @@ final class DirectDictationController {
     case let .triggerReleased(slot):
       guard slot == activeSlot else { return }
       send(.triggerReleased(now: .now))
+    case .middleMousePressed:
+      // The mouse has no language binding of its own, so it always uses the
+      // primary language and toggles the session rather than acting as a hold.
+      if !machine.isSessionActive {
+        activeSlot = .primary
+      }
+      send(.menuToggled(now: .now))
     case .cancelPressed:
       send(.escapePressed)
     case .readAloudPressed:

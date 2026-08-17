@@ -12,6 +12,8 @@ final class GlobalKeyEventMonitor: @unchecked Sendable {
   enum Event: Sendable {
     case triggerPressed(TriggerSlot)
     case triggerReleased(TriggerSlot)
+    /// A middle-button click toggles primary-language Direct Dictation.
+    case middleMousePressed
     case cancelPressed
     /// Option+Escape — the Read Aloud toggle, matching the shortcut
     /// macOS Spoken Content uses for "speak selection".
@@ -50,6 +52,7 @@ final class GlobalKeyEventMonitor: @unchecked Sendable {
       .flagsChanged,
       .keyDown,
       .keyUp,
+      .otherMouseDown,
       .tapDisabledByTimeout,
       .tapDisabledByUserInput,
     ])
@@ -157,6 +160,11 @@ final class GlobalKeyEventMonitor: @unchecked Sendable {
     let isSuspended = stateLock.withLock { suspended }
     if isSuspended {
       return Unmanaged.passUnretained(event)
+    }
+
+    if Self.isMiddleMouseToggle(type: type, event: event) {
+      handler(.middleMousePressed)
+      return nil
     }
 
     if type == .flagsChanged {
@@ -336,6 +344,14 @@ final class GlobalKeyEventMonitor: @unchecked Sendable {
   static func flagsMatch(_ flags: CGEventFlags, mask: CGEventFlags) -> Bool {
     let relevant: CGEventFlags = [.maskCommand, .maskAlternate, .maskControl, .maskShift]
     return flags.intersection(relevant) == mask.intersection(relevant)
+  }
+
+  /// Middle mouse is a toggle-only control. Button-up is deliberately ignored
+  /// so a long click cannot accidentally become push-to-talk.
+  static func isMiddleMouseToggle(type: CGEventType, event: CGEvent) -> Bool {
+    type == .otherMouseDown
+      && event.getIntegerValueField(.mouseEventButtonNumber)
+        == Int64(CGMouseButton.center.rawValue)
   }
 
   private func eventMask(for types: [CGEventType]) -> CGEventMask {
