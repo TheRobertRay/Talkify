@@ -27,6 +27,7 @@ final class AppSettings {
     static let dictationTriggerBinding = "dictationTriggerBinding"
     static let readAloudBinding = "readAloudBinding"
     static let recognitionLocale = "recognitionLocale"
+    static let cleanDictation = "cleanDictationEnabled"
     static let secondaryRecognitionLocale = "recognitionLocaleSecondary"
     static let secondaryTriggerBinding = "dictationTriggerBindingSecondary"
     static let transcriptDestination = "transcriptDestination"
@@ -125,6 +126,12 @@ final class AppSettings {
     }
   }
 
+  /// A small local pass over finalized English text. This never changes live
+  /// recognition and never sends transcript text to a model or service.
+  var cleanDictationEnabled: Bool {
+    didSet { defaults.set(cleanDictationEnabled, forKey: Keys.cleanDictation) }
+  }
+
   /// The second language, with its own trigger key. Empty means off, which
   /// is the default: one key, one language, exactly as before.
   var secondaryRecognitionLocaleIdentifier: String {
@@ -197,6 +204,7 @@ final class AppSettings {
       in: defaults, key: Keys.readAloudBinding
     ) ?? .optionEscape
     recognitionLocaleIdentifier = defaults.string(forKey: Keys.recognitionLocale) ?? ""
+    cleanDictationEnabled = defaults.object(forKey: Keys.cleanDictation) as? Bool ?? true
     secondaryRecognitionLocaleIdentifier =
       defaults.string(forKey: Keys.secondaryRecognitionLocale) ?? ""
     secondaryTriggerBinding = Self.storedBinding(

@@ -442,7 +442,13 @@ final class DirectDictationController {
     Task { [weak self] in
       guard let self else { return }
       do {
-        let text = try await speechService.finish()
+        let recognizedText = try await speechService.finish()
+        let text: String
+        if settings.cleanDictationEnabled, let locale = locale(for: activeSlot) {
+          text = DictationTextCleaner.clean(recognizedText, locale: locale)
+        } else {
+          text = recognizedText
+        }
         hudController.hide()
         let outcome = await textInsertionService.insert(text, into: focusedTarget)
         switch outcome {

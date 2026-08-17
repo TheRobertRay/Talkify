@@ -22,6 +22,10 @@ The first implementation milestone contains only **Direct Dictation**. Other fea
 A session that converts the user's microphone speech into text for the previously focused control.
 _Avoid_: Voice typing, transcription mode
 
+**Clean Dictation**:
+An optional local pass that removes only high-confidence English filler words and repeated starts from finalized **Direct Dictation** text before insertion.
+_Avoid_: AI rewrite, polished message
+
 **Dictation Trigger**:
 The configured keyboard input that controls **Direct Dictation** through press, release, and tap gestures.
 _Avoid_: Hotkey, shortcut
@@ -173,8 +177,10 @@ _Avoid_: Transcript history, cloud analytics
 - Settings preserves its selected section and window frame while the app runs, and opens on Appearance after a fresh launch
 - The voice-reactive visual must make silence and a dead microphone look different
 - With Reduce Motion enabled, the HUD replaces the animated visual with a quiet level meter and skips expand/collapse animation
-- Version 1 inserts raw finalized text without filler-word or AI cleanup
-- Text cleanup is a later feature and must not affect the first implementation
+- **Clean Dictation** is enabled by default and may be turned off in Settings
+- **Clean Dictation** runs only after recognition finishes, so live text and recognition latency stay unchanged
+- **Clean Dictation** is deterministic, local, and fail-open: it adds no model, stores no transcript, and returns the original when cleanup would remove everything
+- **Clean Dictation** handles only English; every other **Dictation Language** inserts Apple's finalized text unchanged
 - A **Dictation Language** is bound to a **Dictation Trigger**; a second language means a second trigger key, never automatic detection
 - Talkify never detects the spoken language: Apple Speech transcribes one language per session, and a wrong guess returns confident nonsense instead of an error
 - Every bound **Dictation Language** stays prewarmed and reserved, so either trigger answers as fast as the other

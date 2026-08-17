@@ -70,6 +70,17 @@ struct LanguageSettingsView: View {
         }
       }
 
+      SettingsCard(title: "Text") {
+        SettingsRow(
+          title: "Clean dictation",
+          description: "Remove obvious English filler words and repeated starts before insertion"
+        ) {
+          Toggle("Clean dictation", isOn: $settings.cleanDictationEnabled)
+            .labelsHidden()
+            .toggleStyle(.switch)
+        }
+      }
+
       VStack(alignment: .leading, spacing: 2) {
         Text(
           "Both languages stay loaded, so either key answers as fast as the "
