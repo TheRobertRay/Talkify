@@ -25,6 +25,7 @@ struct AppSettingsTests {
     #expect(settings.readAloudVoiceID.isEmpty)
     #expect(settings.dictationTriggerBinding == .fnTrigger)
     #expect(settings.readAloudBinding == .optionEscape)
+    #expect(settings.cleanDictationEnabled)
   }
 
   @Test func everyPreferenceRoundTrips() {
@@ -49,6 +50,7 @@ struct AppSettingsTests {
     )
     settings.dictationTriggerBinding = rightCommandTrigger
     settings.readAloudBinding = f5Binding
+    settings.cleanDictationEnabled = false
 
     let reloaded = AppSettings(defaults: defaults)
     #expect(reloaded.soundSet == .chime)
@@ -62,6 +64,7 @@ struct AppSettingsTests {
     #expect(reloaded.readAloudVoiceID == "com.apple.voice.premium.en-US.Zoe")
     #expect(reloaded.dictationTriggerBinding == rightCommandTrigger)
     #expect(reloaded.readAloudBinding == f5Binding)
+    #expect(!reloaded.cleanDictationEnabled)
   }
 
   @Test func preferencesUseStableStorageKeys() {
@@ -75,6 +78,7 @@ struct AppSettingsTests {
     settings.revealStyle = .drift
     settings.longDraftStyle = .tailOnly
     settings.readAloudVoiceID = "com.apple.voice.enhanced.en-GB.Jamie"
+    settings.cleanDictationEnabled = false
 
     #expect(defaults.string(forKey: "dictationSoundSet") == "Click")
     #expect(defaults.object(forKey: "dictationSoundsEnabled") as? Bool == false)
@@ -84,6 +88,7 @@ struct AppSettingsTests {
     #expect(defaults.string(forKey: "hudRevealStyle") == "Drift")
     #expect(defaults.string(forKey: "hudLongDraftStyle") == "Tail Only")
     #expect(defaults.string(forKey: "readAloudVoice") == "com.apple.voice.enhanced.en-GB.Jamie")
+    #expect(defaults.object(forKey: "cleanDictationEnabled") as? Bool == false)
   }
 
   @Test func keyBindingsPersistUnderTheirHistoricalKeys() {

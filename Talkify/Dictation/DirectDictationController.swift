@@ -273,6 +273,13 @@ final class DirectDictationController {
     case let .triggerReleased(slot):
       guard slot == activeSlot else { return }
       send(.triggerReleased(now: .now))
+    case .middleMousePressed:
+      // The mouse has no language binding of its own, so it always uses the
+      // primary language and toggles the session rather than acting as a hold.
+      if !machine.isSessionActive {
+        activeSlot = .primary
+      }
+      send(.menuToggled(now: .now))
     case .cancelPressed:
       send(.escapePressed)
     case .readAloudPressed:
@@ -435,7 +442,13 @@ final class DirectDictationController {
     Task { [weak self] in
       guard let self else { return }
       do {
-        let text = try await speechService.finish()
+        let recognizedText = try await speechService.finish()
+        let text: String
+        if settings.cleanDictationEnabled, let locale = locale(for: activeSlot) {
+          text = DictationTextCleaner.clean(recognizedText, locale: locale)
+        } else {
+          text = recognizedText
+        }
         hudController.hide()
         let outcome = await textInsertionService.insert(text, into: focusedTarget)
         switch outcome {

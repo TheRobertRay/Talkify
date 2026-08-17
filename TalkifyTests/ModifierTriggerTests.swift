@@ -81,6 +81,42 @@ struct ModifierTriggerTests {
   }
 }
 
+struct MiddleMouseTriggerTests {
+  @Test func middleMouseDownIsTheOnlyMouseToggleEvent() throws {
+    let middleDown = try #require(CGEvent(
+      mouseEventSource: nil,
+      mouseType: .otherMouseDown,
+      mouseCursorPosition: .zero,
+      mouseButton: .center
+    ))
+    let middleUp = try #require(CGEvent(
+      mouseEventSource: nil,
+      mouseType: .otherMouseUp,
+      mouseCursorPosition: .zero,
+      mouseButton: .center
+    ))
+    let rightDown = try #require(CGEvent(
+      mouseEventSource: nil,
+      mouseType: .rightMouseDown,
+      mouseCursorPosition: .zero,
+      mouseButton: .right
+    ))
+
+    #expect(GlobalKeyEventMonitor.isMiddleMouseToggle(
+      type: .otherMouseDown,
+      event: middleDown
+    ))
+    #expect(!GlobalKeyEventMonitor.isMiddleMouseToggle(
+      type: .otherMouseUp,
+      event: middleUp
+    ))
+    #expect(!GlobalKeyEventMonitor.isMiddleMouseToggle(
+      type: .rightMouseDown,
+      event: rightDown
+    ))
+  }
+}
+
 /// The whole trigger, not just its key: the bound key down plus exactly the
 /// modifiers it was recorded with. This is what lets fn + ⌥ be a trigger while
 /// fn on its own keeps scrolling pages (issue #40).
